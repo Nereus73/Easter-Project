@@ -54,3 +54,7 @@ dkms.conf
 # Debug and targetConfig ignore
 /Debug
 /targetConfigs
+
+# Project settings ignore
+/.settings
+.clangd

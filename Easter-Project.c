@@ -31,8 +31,7 @@
  */
 
 #include "ti_msp_dl_config.h"
-#include "driverlib/dl_uart.h"
-#include "driverlib/dl_uart_main.h"
+
 
 
 int main(void)
