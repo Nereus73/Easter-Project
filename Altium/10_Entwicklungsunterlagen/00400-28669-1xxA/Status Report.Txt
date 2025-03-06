@@ -1,0 +1,13 @@
+Output: DRL
+Type  : NC Drill
+From  : PCB Document [Oster-Platine.PcbDoc]
+   Generated File[DRL-00400-28669-1xxA-Bunny-PCB-RoundHoles.TXT]
+   Generated File[DRL-00400-28669-1xxA-Bunny-PCB-SlotHoles.TXT]
+   Generated File[DRL-00400-28669-1xxA-Bunny-PCB.LDP]
+   Generated File[DRL-00400-28669-1xxA-Bunny-PCB.DRR]
+
+
+Files Generated   : 4
+Documents Printed : 0
+
+Finished Output Generation At 17:11:01 On 19.02.2025

@@ -1,0 +1,3 @@
+Layer Pairs Export File for PCB: D:\Niklas\Oster-Platine\PCB\Oster-Platine.PcbDoc
+LayersSetName=Top_Bot_Thru_Holes|DrillFile=drl-00400-28669-1xxa-bunny-pcb-roundholes.txt|DrillLayers=gtl,g1,g2,gbl
+LayersSetName=Top_Bot_Slot_Holes|DrillFile=drl-00400-28669-1xxa-bunny-pcb-slotholes.txt|DrillLayers=gtl,g1,g2,gbl

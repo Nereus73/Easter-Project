@@ -1,0 +1,19 @@
+----------------------------------------------------------------------------------------------------------------------------------
+NCDrill File Report For: Oster-Platine.PcbDoc   19.02.2025  17:11:01
+----------------------------------------------------------------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bot Layer
+ASCII RoundHoles File : DRL-00400-28669-1xxA-Bunny-PCB-RoundHoles.TXT
+ASCII SlotHoles File : DRL-00400-28669-1xxA-Bunny-PCB-SlotHoles.TXT
+
+Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
+----------------------------------------------------------------------------------------------------------------------------------
+T1      10mil (0.25mm)                                            Round             185       PTH        26.63inch (676.52mm)
+T2      14mil (0.35mm)                                            Round             14        PTH        0.50inch (12.81mm)
+T3      24mil (0.6mm)                                             Slot              4         PTH        1.51inch (38.42mm)
+T4      35mil (0.9mm)                                             Round             2         NPTH       0.12inch (3.00mm)
+T5      71mil (1.8mm)                                             Round             3         NPTH       1.43inch (36.40mm)
+----------------------------------------------------------------------------------------------------------------------------------
+Totals                                                                              208
+
+Total Processing Time (hh:mm:ss) : 00:00:00
