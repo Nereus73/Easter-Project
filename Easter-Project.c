@@ -30,14 +30,100 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ti/driverlib/dl_spi.h"
 #include "ti_msp_dl_config.h"
 
+
+/* Number of bytes for UART packet size */
+#define UART_PACKET_SIZE (26)
+
+/* Delay for 5ms to ensure UART TX is idle before starting transmission */
+#define UART_TX_DELAY (160000)
+
+/* Data packets to transmit over UART */
+uint8_t gTxPacket1[UART_PACKET_SIZE] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+    'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
+    'x', 'y', 'z'};
+uint8_t gTxPacket2[UART_PACKET_SIZE] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+    'X', 'Y', 'Z'};
+
+uint8_t spiData[1] = {170};
+
+/*
+ * Helper function to transmit a packet of data, and ensure that the
+ * transmitter is ready before sending data
+ */
+void transmitPacketBlocking(uint8_t *buffer, uint32_t size)
+{
+    uint32_t i;
+    for (i = 0; i < size; i++) {
+        /*
+         * The transmitter will automatically check that the CTS signal is
+         * asserted (low) before transmitting the next byte. If CTS is
+         * de-asserted (high), the byte will not be transmitted out of the TX
+         * FIFO. Therefore block if the TX FIFO is full before attempting
+         * to fill it.
+         */
+        DL_UART_Main_transmitDataBlocking(UART_0_INST, buffer[i]);
+    }
+}
+
+void SPI_Controller_transmitData(uint8_t *data, uint8_t dataLength)
+{
+    int i = 0;
+    DL_SPI_setChipSelect(SPI_0_INST, DL_SPI_CHIP_SELECT_2);
+    for (i = 0; i < dataLength; i++) {
+        while (DL_SPI_isBusy(SPI_0_INST))
+            ;
+        DL_SPI_transmitData8(SPI_0_INST, data[i]);
+    }
+}
+
+void SevenSegmentUpdate(char number) {
+    switch (number) {
+        case '0': spiData[0] = 0b00111111; break;
+        case '1': spiData[0] = 0b00000110; break;
+        case '2': spiData[0] = 0b01011011; break;
+        case '3': spiData[0] = 0b01001111; break;
+        case '4': spiData[0] = 0b01100110; break;
+        case '5': spiData[0] = 0b01101101; break;
+        case '6': spiData[0] = 0b01111101; break;
+        case '7': spiData[0] = 0b00000111; break;
+        case '8': spiData[0] = 0b01111111; break;
+        case '9': spiData[0] = 0b01101111; break;
+        default: spiData[0] = 0b01000000; break;
+    }
+    SPI_Controller_transmitData(spiData, 1);
+}
 
 
 int main(void)
 {
+    SYSCFG_DL_init();
+
+    /* Optional delay to ensure UART TX is idle before starting transmission */
+    delay_cycles(UART_TX_DELAY);
 
     while (1) {
-     
+        SevenSegmentUpdate('0');
+        delay_cycles(10000000);
+        SevenSegmentUpdate('1');
+        delay_cycles(10000000);
+        SevenSegmentUpdate('2');
+        delay_cycles(10000000);
+        SevenSegmentUpdate('3');
+        delay_cycles(10000000);
+        SevenSegmentUpdate('4');
+        delay_cycles(10000000);
+        SevenSegmentUpdate('5');
+        delay_cycles(10000000);
+        SevenSegmentUpdate('6');
+        delay_cycles(10000000);
+        SevenSegmentUpdate('7');
+        delay_cycles(10000000);
+        SevenSegmentUpdate('8');
+        delay_cycles(10000000);
+        SevenSegmentUpdate('9');
     }
 }
