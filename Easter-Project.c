@@ -31,13 +31,52 @@
  */
 
 #include "ti_msp_dl_config.h"
+#include "spi/spi.h"
+#include "seven-segment-display/seven-segment-display.h"
 
+/* Number of bytes for UART packet size */
+#define UART_PACKET_SIZE (26)
 
+/* Delay for 5ms to ensure UART TX is idle before starting transmission */
+#define UART_TX_DELAY (160000)
+
+/* Data packets to transmit over UART */
+uint8_t gTxPacket1[UART_PACKET_SIZE] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+    'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
+    'x', 'y', 'z'};
+uint8_t gTxPacket2[UART_PACKET_SIZE] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+    'X', 'Y', 'Z'};
+
+const uint32_t DELAY = 10000000;
 
 int main(void)
 {
+    SYSCFG_DL_init();
+
+    /* Optional delay to ensure UART TX is idle before starting transmission */
+    delay_cycles(UART_TX_DELAY);
 
     while (1) {
-     
+        SevenSegmentUpdate('0');
+        delay_cycles(DELAY);
+        SevenSegmentUpdate('1');
+        delay_cycles(DELAY);
+        SevenSegmentUpdate('2');
+        delay_cycles(DELAY);
+        SevenSegmentUpdate('3');
+        delay_cycles(DELAY);
+        SevenSegmentUpdate('4');
+        delay_cycles(DELAY);
+        SevenSegmentUpdate('5');
+        delay_cycles(DELAY);
+        SevenSegmentUpdate('6');
+        delay_cycles(DELAY);
+        SevenSegmentUpdate('7');
+        delay_cycles(DELAY);
+        SevenSegmentUpdate('8');
+        delay_cycles(DELAY);
+        SevenSegmentUpdate('9');
+        delay_cycles(DELAY);
     }
 }
