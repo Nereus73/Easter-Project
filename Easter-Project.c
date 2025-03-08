@@ -33,6 +33,7 @@
 #include "ti_msp_dl_config.h"
 #include "spi/spi.h"
 #include "seven-segment-display/seven-segment-display.h"
+#include "uart/uart.h"
 
 /* Number of bytes for UART packet size */
 #define UART_PACKET_SIZE (26)
@@ -57,6 +58,8 @@ int main(void)
     /* Optional delay to ensure UART TX is idle before starting transmission */
     delay_cycles(UART_TX_DELAY);
 
+    uart_write_blocking("Hello World!");
+    
     while (1) {
         SevenSegmentUpdate('0');
         delay_cycles(DELAY);
@@ -78,5 +81,6 @@ int main(void)
         delay_cycles(DELAY);
         SevenSegmentUpdate('9');
         delay_cycles(DELAY);
+        uart_transmit_blocking(gTxPacket1, UART_PACKET_SIZE);
     }
 }
