@@ -34,6 +34,7 @@
 #include "spi/spi.h"
 #include "seven-segment-display/seven-segment-display.h"
 #include "uart/uart.h"
+#include "i2c/i2c.h"
 
 /* Number of bytes for UART packet size */
 #define UART_PACKET_SIZE (26)
@@ -59,7 +60,16 @@ int main(void)
     delay_cycles(UART_TX_DELAY);
 
     uart_write_blocking("Hello World!");
-    
+
+    char writeBuf[1] = { 0xff };
+    char readBuf[2] = {};
+    I2C_Transaction i2c_transaction = {};
+    i2c_transaction.writeBuf = writeBuf;
+    i2c_transaction.writeCount = 1;
+    i2c_transaction.readBuf = readBuf;
+    i2c_transaction.readCount = 2;
+    i2c_transaction.slaveAddress = 0x50;
+
     while (1) {
         SevenSegmentUpdate('0');
         delay_cycles(DELAY);
@@ -81,6 +91,7 @@ int main(void)
         delay_cycles(DELAY);
         SevenSegmentUpdate('9');
         delay_cycles(DELAY);
-        uart_transmit_blocking(gTxPacket1, UART_PACKET_SIZE);
+        //uart_transmit_blocking(gTxPacket1, UART_PACKET_SIZE);
+        i2c_transfer_blocking(1, &i2c_transaction);
     }
 }
