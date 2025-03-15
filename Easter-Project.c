@@ -30,11 +30,15 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+ #include <stdint.h>
+ #include <stdio.h>
+
 #include "ti_msp_dl_config.h"
 #include "spi/spi.h"
 #include "seven-segment-display/seven-segment-display.h"
 #include "uart/uart.h"
 #include "i2c/i2c.h"
+#include "sensors/fdc1004.h"
 
 /* Number of bytes for UART packet size */
 #define UART_PACKET_SIZE (26)
@@ -51,6 +55,7 @@ uint8_t gTxPacket2[UART_PACKET_SIZE] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
     'X', 'Y', 'Z'};
 
 const uint32_t DELAY = 10000000;
+char buffer[64];
 
 int main(void)
 {
@@ -60,15 +65,6 @@ int main(void)
     delay_cycles(UART_TX_DELAY);
 
     uart_write_blocking("Hello World!");
-
-    char writeBuf[1] = { 0xff };
-    char readBuf[2] = {};
-    I2C_Transaction i2c_transaction = {};
-    i2c_transaction.writeBuf = writeBuf;
-    i2c_transaction.writeCount = 1;
-    i2c_transaction.readBuf = readBuf;
-    i2c_transaction.readCount = 2;
-    i2c_transaction.slaveAddress = 0x50;
 
     while (1) {
         SevenSegmentUpdate('0');
@@ -92,6 +88,11 @@ int main(void)
         SevenSegmentUpdate('9');
         delay_cycles(DELAY);
         //uart_transmit_blocking(gTxPacket1, UART_PACKET_SIZE);
-        i2c_transfer_blocking(1, &i2c_transaction);
+        //i2c_transfer_blocking(1, &i2c_transaction);
+
+        const uint16_t deviceID = getDeviceID();
+
+        snprintf(buffer, sizeof(buffer), "DeviceID = 0x%x", deviceID);
+        uart_write_blocking(buffer);
     }
 }

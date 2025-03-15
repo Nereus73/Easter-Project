@@ -1,11 +1,12 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 typedef struct I2C_Transaction {
-	void    *writeBuf;
+	uint8_t    *writeBuf;
     size_t  writeCount;   
-    void    *readBuf;     
+    uint8_t    *readBuf;     
     size_t  readCount;    
     unsigned char slaveAddress; 
 } I2C_Transaction;
