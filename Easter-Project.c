@@ -66,8 +66,10 @@ int main(void)
 
     uart_write_blocking("Hello World!");
 
+    initFDC1004();
+
     while (1) {
-        SevenSegmentUpdate('0');
+        /*SevenSegmentUpdate('0');
         delay_cycles(DELAY);
         SevenSegmentUpdate('1');
         delay_cycles(DELAY);
@@ -86,13 +88,18 @@ int main(void)
         SevenSegmentUpdate('8');
         delay_cycles(DELAY);
         SevenSegmentUpdate('9');
-        delay_cycles(DELAY);
+        delay_cycles(DELAY);*/
         //uart_transmit_blocking(gTxPacket1, UART_PACKET_SIZE);
         //i2c_transfer_blocking(1, &i2c_transaction);
 
-        const uint16_t deviceID = getDeviceID();
+        delay_cycles(DELAY);
 
-        snprintf(buffer, sizeof(buffer), "DeviceID = 0x%x", deviceID);
+        const uint16_t ch1 = getMeasurement(1);
+        const uint16_t ch2 = getMeasurement(2);
+        const uint16_t ch3 = getMeasurement(3);
+        const uint16_t ch4 = getMeasurement(4);
+
+        snprintf(buffer, sizeof(buffer), "ch1 = %u ch2 = %u ch3 = %u ch4 = %u", ch1, ch2, ch3, ch4);
         uart_write_blocking(buffer);
     }
 }
