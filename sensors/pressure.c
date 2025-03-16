@@ -76,10 +76,10 @@ uint8_t SPI_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_p
 }
 
 //Driver compatible SPI write
-uint8_t SPI_write(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
+uint8_t SPI_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
     DL_SPI_CHIP_SELECT chipSelect = *(DL_SPI_CHIP_SELECT*)intf_ptr;
     // (void)intf_ptr; notwendig?
-    uint32_t readCounter = 0;
+    uint32_t writeCounter = 0;
     DL_SPI_setChipSelect(SPI_0_INST, chipSelect);
     while (writeCounter <= len) {
         if (writeCounter == 0) {
@@ -92,7 +92,7 @@ uint8_t SPI_write(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_
 }
 
 // Debug functions
-void BMP390_RegWrite(uint8_t reg_addr, uint8_t *read_data, uint32_t len, void *intf_ptr) {
+void BMP390_RegWrite(uint8_t address, uint8_t data){
     BMP390SPI_Interface.rxDataCount = 0;
     BMP390SPI_Interface.txData[0] = address & writeByte;
     BMP390SPI_Interface.txData[1] = data;
