@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "ti/driverlib/dl_uart.h"
 #include "ti/driverlib/dl_uart_main.h"
 #include "ti/driverlib/dl_uart_extend.h"
 #include "ti_msp_dl_config.h"
@@ -22,4 +23,16 @@ void uart_write_blocking(const char* const data) {
     }
 
     DL_UART_transmitDataBlocking(UART_0_INST, LINE_FEED);
+}
+
+uint32_t uart_receive_blocking(uint8_t* data) {
+    uint32_t maxRead = sizeof(data);
+    uint32_t counter = 0;
+    char lastSymbol = 'a';
+    while ((counter < maxRead) && (lastSymbol != LINE_FEED)) {
+        data[counter] = DL_UART_receiveDataBlocking(UART_0_INST);
+        lastSymbol = data[counter];
+        counter++;
+    }
+    return counter;
 }

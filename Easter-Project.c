@@ -32,6 +32,7 @@
 
 #include "ti_msp_dl_config.h"
 #include "spi/spi.h"
+#include "sensors/pressure.h"
 #include "seven-segment-display/seven-segment-display.h"
 #include "uart/uart.h"
 
@@ -50,6 +51,7 @@ uint8_t gTxPacket2[UART_PACKET_SIZE] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
     'X', 'Y', 'Z'};
 
 const uint32_t DELAY = 10000000;
+uint8_t uartData[32];
 
 int main(void)
 {
@@ -60,27 +62,23 @@ int main(void)
 
     uart_write_blocking("Hello World!");
     
+
+    uint32_t counter = 0;
+    DL_SPI_CHIP_SELECT cs = DL_SPI_CHIP_SELECT_1;
+
     while (1) {
-        SevenSegmentUpdate('0');
-        delay_cycles(DELAY);
-        SevenSegmentUpdate('1');
-        delay_cycles(DELAY);
-        SevenSegmentUpdate('2');
-        delay_cycles(DELAY);
-        SevenSegmentUpdate('3');
-        delay_cycles(DELAY);
-        SevenSegmentUpdate('4');
-        delay_cycles(DELAY);
-        SevenSegmentUpdate('5');
-        delay_cycles(DELAY);
-        SevenSegmentUpdate('6');
-        delay_cycles(DELAY);
-        SevenSegmentUpdate('7');
-        delay_cycles(DELAY);
-        SevenSegmentUpdate('8');
-        delay_cycles(DELAY);
-        SevenSegmentUpdate('9');
-        delay_cycles(DELAY);
-        uart_transmit_blocking(gTxPacket1, UART_PACKET_SIZE);
+        counter = uart_receive_blocking(uartData);
+        /*
+        if (counter == 2) { // read
+            SPI_read(uartData[0], &uartData[1], 1, &cs);
+            uartData[2] = LINE_FEED;
+            counter = 3;
+        }
+        if (counter > 2) { // write
+            SPI_write(uartData[0], &uartData[1], counter-2, &cs);
+        }
+        */
+        uart_transmit_blocking(uartData, counter);
+        Delayms(10);
     }
 }

@@ -3,6 +3,7 @@
 #include "spi/spi.h"
 
 #include "ti/driverlib/dl_spi.h"
+#include "ti/driverlib/m0p/dl_core.h"
 #include "ti_msp_dl_config.h"
 #include "uart/uart.h"
 
@@ -59,7 +60,7 @@ uint8_t SPI_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_p
     uint32_t readCounter = 0;
     uint32_t writeCounter = 0;
     DL_SPI_setChipSelect(SPI_0_INST, chipSelect);
-    while (readCounter <= len) {
+    while (readCounter < len) {
         if (writeCounter <= len) {
             if (writeCounter == 0) {
                 if (DL_SPI_transmitDataCheck8(SPI_0_INST, reg_addr)) writeCounter++;
@@ -89,6 +90,18 @@ uint8_t SPI_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void 
         }
     }  
     return 0;
+}
+
+// Driver Magnetometer compatible Delay function
+void Delayms(uint32_t period) {
+    while (period--) {
+        Delayus(1000,NULL);
+    }
+}
+// Driver compatible Delay function
+void Delayus(uint32_t period, void *intf_ptr) {
+    // assuming 32 MHz -> Factor 32 -> Shifting 5
+    delay_cycles(period << 5);
 }
 
 // Debug functions
