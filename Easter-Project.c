@@ -81,22 +81,39 @@ int main(void)
     spi.gpioInt = GPIO_INT_PORT;
     spi.spiInt = SPI_0_INST;
     initBMI270(&spi);
-
-    while (1) {      
-        //counter = uart_receive_blocking(uartData);
+    uint16_t accX, accY, accZ;
+    while (1) {    
+        SevenSegmentUpdate(0);
+        /*
+        counter = uart_receive_blocking(uartData);
         reg = uartData[0];
 
-        if (counter == 3) { // write
-           // SPI_write(uartData[0], &uartData[1], 1, &spi);
+        if (counter >= 3) { // write
+           SPI_write(uartData[0], &uartData[1], counter - 2, &spi);
         }  
         if (counter == 2) { // read
-           // SPI_read(reg, uartData, 5, &spi);                 
-           // uartData[5] = 0x0a;
-            //counter = 6;
+           //SPI_read(reg, uartData, 2, &spi);                 
+          // uartData[2] = 0x0a;
+           // counter = 3;
+           
         }     
-        uart_transmit_blocking(uartData, counter);
+        //uart_transmit_blocking(uartData, counter);
 
         //uart_write_blocking("S");
         SPI_Delayms(10);
+        */
+        getSensorData(&accX, &accY, &accZ);
+        uartData[0] = accX >> 8;
+        uartData[1] = 0x00FF & accX;
+        uartData[2] = 0x00;
+        uartData[3] = accY >> 8;
+        uartData[4] = 0x00FF & accY;
+        uartData[5] = 0x00;
+        uartData[6] = accZ >> 8;
+        uartData[7] = 0x00FF & accZ;
+        uartData[8] = 0x0a;
+        uart_transmit_blocking(uartData, 9);
+
+        SPI_Delayms(100);
         }
 }
