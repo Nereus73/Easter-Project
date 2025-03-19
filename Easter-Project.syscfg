@@ -1,8 +1,8 @@
 /**
  * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
- * @cliArgs --device "MSPM0L130X" --part "Default" --package "VQFN-32(RHB)" --product "mspm0_sdk@2.03.00.08"
- * @v2CliArgs --device "MSPM0L1306" --package "VQFN-32(RHB)" --product "mspm0_sdk@2.03.00.08"
+ * @cliArgs --device "MSPM0L130X" --part "Default" --package "VQFN-32(RHB)" --product "mspm0_sdk@2.04.00.06"
+ * @v2CliArgs --device "MSPM0L1306" --package "VQFN-32(RHB)" --product "mspm0_sdk@2.04.00.06"
  * @versions {"tool":"1.22.0+3893"}
  */
 
@@ -25,38 +25,51 @@ const UART1  = UART.addInstance();
 /**
  * Write custom configuration values to the imported modules.
  */
-GPIO1.$name                          = "GPIO_INT";
-GPIO1.associatedPins.create(9);
-GPIO1.associatedPins[0].$name        = "BUT_POS";
-GPIO1.associatedPins[0].direction    = "INPUT";
-GPIO1.associatedPins[0].ioStructure  = "SD";
-GPIO1.associatedPins[0].assignedPin  = "27";
-GPIO1.associatedPins[1].$name        = "BUT_ANZ";
-GPIO1.associatedPins[1].direction    = "INPUT";
-GPIO1.associatedPins[1].assignedPin  = "18";
-GPIO1.associatedPins[2].$name        = "INT2_ACC";
-GPIO1.associatedPins[2].direction    = "INPUT";
-GPIO1.associatedPins[2].assignedPin  = "26";
-GPIO1.associatedPins[3].$name        = "INT1_ACC";
-GPIO1.associatedPins[3].direction    = "INPUT";
-GPIO1.associatedPins[3].assignedPin  = "25";
-GPIO1.associatedPins[4].$name        = "INT_CAP";
-GPIO1.associatedPins[4].assignedPin  = "17";
-GPIO1.associatedPins[4].direction    = "INPUT";
-GPIO1.associatedPins[4].pin.$assign  = "PA17/OPA1.IN0-";
-GPIO1.associatedPins[5].$name        = "SD_CAP";
-GPIO1.associatedPins[5].initialValue = "SET";
-GPIO1.associatedPins[5].ioStructure  = "SD";
-GPIO1.associatedPins[5].pin.$assign  = "PA14";
-GPIO1.associatedPins[6].$name        = "INT_LIGHT";
-GPIO1.associatedPins[6].direction    = "INPUT";
-GPIO1.associatedPins[6].ioStructure  = "SD";
-GPIO1.associatedPins[6].pin.$assign  = "PA7";
-GPIO1.associatedPins[7].$name        = "WAKEUP";
-GPIO1.associatedPins[7].pin.$assign  = "PA6";
-GPIO1.associatedPins[8].$name        = "SUSPEND";
-GPIO1.associatedPins[8].direction    = "INPUT";
-GPIO1.associatedPins[8].pin.$assign  = "PA4";
+const gate6  = system.clockTree["MFCLKGATE"];
+gate6.enable = true;
+
+GPIO1.$name                           = "GPIO_INT";
+GPIO1.associatedPins.create(12);
+GPIO1.associatedPins[0].$name         = "BUT_POS";
+GPIO1.associatedPins[0].direction     = "INPUT";
+GPIO1.associatedPins[0].ioStructure   = "SD";
+GPIO1.associatedPins[0].assignedPin   = "27";
+GPIO1.associatedPins[1].$name         = "BUT_ANZ";
+GPIO1.associatedPins[1].direction     = "INPUT";
+GPIO1.associatedPins[1].assignedPin   = "18";
+GPIO1.associatedPins[2].$name         = "INT2_ACC";
+GPIO1.associatedPins[2].direction     = "INPUT";
+GPIO1.associatedPins[2].assignedPin   = "26";
+GPIO1.associatedPins[3].$name         = "INT1_ACC";
+GPIO1.associatedPins[3].direction     = "INPUT";
+GPIO1.associatedPins[3].assignedPin   = "25";
+GPIO1.associatedPins[4].$name         = "INT_CAP";
+GPIO1.associatedPins[4].assignedPin   = "17";
+GPIO1.associatedPins[4].direction     = "INPUT";
+GPIO1.associatedPins[4].pin.$assign   = "PA17/OPA1.IN0-";
+GPIO1.associatedPins[5].$name         = "SD_CAP";
+GPIO1.associatedPins[5].initialValue  = "SET";
+GPIO1.associatedPins[5].ioStructure   = "SD";
+GPIO1.associatedPins[5].pin.$assign   = "PA14";
+GPIO1.associatedPins[6].$name         = "INT_LIGHT";
+GPIO1.associatedPins[6].direction     = "INPUT";
+GPIO1.associatedPins[6].ioStructure   = "SD";
+GPIO1.associatedPins[6].pin.$assign   = "PA7";
+GPIO1.associatedPins[7].$name         = "WAKEUP";
+GPIO1.associatedPins[7].pin.$assign   = "PA6";
+GPIO1.associatedPins[8].$name         = "SUSPEND";
+GPIO1.associatedPins[8].direction     = "INPUT";
+GPIO1.associatedPins[8].pin.$assign   = "PA4";
+GPIO1.associatedPins[9].initialValue  = "SET";
+GPIO1.associatedPins[9].ioStructure   = "SD";
+GPIO1.associatedPins[9].$name         = "CS1";
+GPIO1.associatedPins[9].pin.$assign   = "PA3";
+GPIO1.associatedPins[10].$name        = "CS0";
+GPIO1.associatedPins[10].initialValue = "SET";
+GPIO1.associatedPins[10].pin.$assign  = "PA8";
+GPIO1.associatedPins[11].$name        = "CS2";
+GPIO1.associatedPins[11].initialValue = "SET";
+GPIO1.associatedPins[11].pin.$assign  = "PA24/OPA0.IN0-";
 
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
@@ -79,34 +92,39 @@ I2C2.sdaPinConfig.$name              = "ti_driverlib_gpio_GPIOPinGeneric9";
 I2C2.sclPinConfig.$name              = "ti_driverlib_gpio_GPIOPinGeneric10";
 
 PWM1.$name                      = "PWM_0";
-PWM1.profile                    = "basic_single_channel_center_align";
+PWM1.timerCount                 = 100;
+PWM1.ccIndex                    = [0];
+PWM1.dutyArgs                   = "[50,0,0,0]";
+PWM1.pwmMode                    = "CENTER_ALIGN";
+PWM1.clockDivider               = 8;
+PWM1.clockPrescale              = 80;
 PWM1.peripheral.$assign         = "TIMG0";
 PWM1.peripheral.ccp0Pin.$assign = "PA5";
 PWM1.PWM_CHANNEL_0.$name        = "ti_driverlib_pwm_PWMTimerCC0";
 PWM1.ccp0PinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric15";
 
 SPI1.$name                      = "SPI_0";
-SPI1.targetBitRate              = 1000000;
 SPI1.enableDMAEvent1            = false;
 SPI1.enableDMAEvent2            = false;
-SPI1.chipSelect                 = ["0","1","2","3"];
+SPI1.txFifoThreshold            = "DL_SPI_TX_FIFO_LEVEL_ONE_FRAME";
+SPI1.rxFifoThreshold            = "DL_SPI_RX_FIFO_LEVEL_ONE_FRAME";
+SPI1.targetBitRate              = 500000;
+SPI1.spiClkDiv                  = "4";
+SPI1.chipSelect                 = ["3"];
+SPI1.peripheral.$assign         = "SPI0";
 SPI1.peripheral.sclkPin.$assign = "PA11";
 SPI1.peripheral.mosiPin.$assign = "PA9";
 SPI1.peripheral.misoPin.$assign = "PA10";
-SPI1.peripheral.cs0Pin.$assign  = "PA8";
-SPI1.peripheral.cs1Pin.$assign  = "PA3";
-SPI1.peripheral.cs2Pin.$assign  = "PA24/OPA0.IN0-";
 SPI1.peripheral.cs3Pin.$assign  = "PA23";
 SPI1.sclkPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric0";
 SPI1.mosiPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric1";
 SPI1.misoPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric2";
-SPI1.cs0PinConfig.$name         = "ti_driverlib_gpio_GPIOPinGeneric3";
-SPI1.cs1PinConfig.$name         = "ti_driverlib_gpio_GPIOPinGeneric4";
-SPI1.cs2PinConfig.$name         = "ti_driverlib_gpio_GPIOPinGeneric5";
-SPI1.cs3PinConfig.$name         = "ti_driverlib_gpio_GPIOPinGeneric6";
+SPI1.cs3PinConfig.$name         = "ti_driverlib_gpio_GPIOPinGeneric4";
 
 SYSCTL.enableROSC      = true;
 SYSCTL.enableSYSOSCFCL = true;
+SYSCTL.MFCLKEn         = true;
+SYSCTL.clockTreeEn     = true;
 
 UART1.$name                    = "UART_0";
 UART1.enableDMARX              = false;
@@ -133,6 +151,3 @@ GPIO1.associatedPins[3].pin.$suggestSolution = "PA25";
 Board.peripheral.$suggestSolution            = "DEBUGSS";
 Board.peripheral.swclkPin.$suggestSolution   = "PA20";
 Board.peripheral.swdioPin.$suggestSolution   = "PA19";
-SPI1.peripheral.$suggestSolution             = "SPI0";
-SYSCTL.peripheral.$suggestSolution           = "SYSCTL";
-SYSCTL.peripheral.roscPin.$suggestSolution   = "PA2";

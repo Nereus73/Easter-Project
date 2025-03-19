@@ -30,11 +30,15 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ti/driverlib/dl_gpio.h"
+#include "ti/driverlib/dl_spi.h"
+#include "ti/driverlib/dl_timerg.h"
 #include "ti_msp_dl_config.h"
 #include "spi/spi.h"
 #include "sensors/pressure.h"
 #include "seven-segment-display/seven-segment-display.h"
 #include "uart/uart.h"
+#include "sensors/B-Messer.h"
 
 /* Number of bytes for UART packet size */
 #define UART_PACKET_SIZE (26)
@@ -50,13 +54,19 @@ uint8_t gTxPacket2[UART_PACKET_SIZE] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
     'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
     'X', 'Y', 'Z'};
 
+#define SPI_PACKET_SIZE (4)
+
+/* Data for SPI to transmit */
+uint8_t gTxPacket[SPI_PACKET_SIZE] = {'M', 'S', 'P', '!'};
+volatile uint8_t gRxPacket[SPI_PACKET_SIZE];
 const uint32_t DELAY = 10000000;
 uint8_t uartData[32];
 
 int main(void)
 {
     SYSCFG_DL_init();
-
+    initSevenSegment();
+    SevenSegmentUpdate(0);
     /* Optional delay to ensure UART TX is idle before starting transmission */
     delay_cycles(UART_TX_DELAY);
 
@@ -64,21 +74,29 @@ int main(void)
     
 
     uint32_t counter = 0;
-    DL_SPI_CHIP_SELECT cs = DL_SPI_CHIP_SELECT_1;
+    uint8_t reg = 0;
+    SPIInterface spi;
+    spi.DummyByte = 0x00;
+    spi.csMask = GPIO_INT_CS0_PIN; 
+    spi.gpioInt = GPIO_INT_PORT;
+    spi.spiInt = SPI_0_INST;
+    initBMI270(&spi);
 
-    while (1) {
-        counter = uart_receive_blocking(uartData);
-        /*
+    while (1) {      
+        //counter = uart_receive_blocking(uartData);
+        reg = uartData[0];
+
+        if (counter == 3) { // write
+           // SPI_write(uartData[0], &uartData[1], 1, &spi);
+        }  
         if (counter == 2) { // read
-            SPI_read(uartData[0], &uartData[1], 1, &cs);
-            uartData[2] = LINE_FEED;
-            counter = 3;
-        }
-        if (counter > 2) { // write
-            SPI_write(uartData[0], &uartData[1], counter-2, &cs);
-        }
-        */
+           // SPI_read(reg, uartData, 5, &spi);                 
+           // uartData[5] = 0x0a;
+            //counter = 6;
+        }     
         uart_transmit_blocking(uartData, counter);
-        Delayms(10);
-    }
+
+        //uart_write_blocking("S");
+        SPI_Delayms(10);
+        }
 }

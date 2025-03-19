@@ -1,10 +1,9 @@
 #include "sensors/bmi2.h"
-#include "sensors/bmi2_defs.h"
 #include "ti_msp_dl_config.h"
 
-#include "sensors/pressure.h"
 #include "sensors/bmi270.h"
 #include "sensors/iis2mdc_reg.h"
+#include "spi/spi.h"
 
 // variables for main BMI270 driver
 static DL_SPI_CHIP_SELECT chipSelectAcc = DL_SPI_CHIP_SELECT_0;
@@ -51,7 +50,7 @@ void initIIS2MDC(void) {
     // Initialize all BMI values for IIS
     bmi2_aux_conf(&dev);
     // Initialize all IIS values
-    devMag.mdelay = Delayms;
+    devMag.mdelay = SPI_Delayms;
     devMag.read_reg = bmi2_aux_i2c_read;
     devMag.write_reg = bmi2_aux_i2c_write;
     devMag.handle = &dev;
@@ -59,17 +58,19 @@ void initIIS2MDC(void) {
     iis2mdc_device_id_get(&devMag, &deviceID);
 }
 
-void initBMI270(void) {
+void initBMI270(SPIInterface* spiInt) {
     // BMI2 Interface init
     dev.intf = BMI2_SPI_INTF;
     dev.read = SPI_read;
     dev.write = SPI_write;
-    dev.intf_ptr = &chipSelectAcc;
-    dev.delay_us = Delayus;
+    dev.intf_ptr = spiInt;
+    dev.delay_us = SPI_Delayus;
     dev.read_write_len = 32;
     dev.config_file_ptr = NULL; // default config file
     //init
-    bmi270_init(&dev);
+    volatile int8_t statusByte = 0;
+    statusByte = bmi270_init(&dev);
+    dev.read_write_len = 33;
     // settings should be set here
 }
 
