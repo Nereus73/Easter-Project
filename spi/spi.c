@@ -1,9 +1,12 @@
+
 #include <stdint.h>
 #include <sys/cdefs.h>
 
 #include "ti_msp_dl_config.h"
 #include "spi/spi.h"
 #include "uart/uart.h"
+
+
 
 
 // Driver compatible SPI read
@@ -21,7 +24,7 @@ uint8_t SPI_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_p
     while (!DL_SPI_transmitDataCheck8(spiStruc->spiInt, reg_addr));
     writeCounter++;
     while (readCounter <= len) {
-        while (writeCounter <= len) {
+        if (writeCounter <= len) {
             if (DL_SPI_transmitDataCheck8(spiStruc->spiInt, spiStruc->DummyByte))  writeCounter++;
         }
         if (!DL_SPI_isRXFIFOEmpty(spiStruc->spiInt)) { 
@@ -35,6 +38,7 @@ uint8_t SPI_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_p
     }
     while (DL_SPI_isBusy(spiStruc->spiInt));
     DL_GPIO_setPins(spiStruc->gpioInt,spiStruc->csMask);
+    SPI_Delayus(100, NULL);
     return 0;
 }
 
@@ -54,8 +58,10 @@ uint8_t SPI_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void 
     while (!DL_SPI_transmitDataCheck8(spiStruc->spiInt, reg_addr));
     writeCounter++;
     while (readCounter <= len) {
-        while (writeCounter <= len) {
-            if (DL_SPI_transmitDataCheck8(spiStruc->spiInt, reg_data[writeCounter - 1]))  writeCounter++;
+        if (writeCounter <= len) {
+            if (DL_SPI_transmitDataCheck8(spiStruc->spiInt, reg_data[writeCounter - 1]))  {
+                writeCounter++;
+            }
         }
         if (!DL_SPI_isRXFIFOEmpty(spiStruc->spiInt)) { 
             readTemp = DL_SPI_receiveDataBlocking8(spiStruc->spiInt);

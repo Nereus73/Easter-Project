@@ -33,3 +33,11 @@ uint32_t uart_receive_blocking(uint8_t* data) {
     }
     return counter;
 }
+
+void debug_print(const char *const fmt, ...) {
+    const uint32_t length = strlen(fmt);
+    for (uint8_t i = 0; i < length; i++) {
+        DL_UART_Main_transmitDataBlocking(UART_0_INST, fmt[i]);
+        
+    }
+}

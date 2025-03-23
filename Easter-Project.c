@@ -30,73 +30,147 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ti/devices/msp/m0p/mspm0l130x.h"
 #include "ti/driverlib/dl_gpio.h"
 #include "ti/driverlib/dl_spi.h"
 #include "ti/driverlib/dl_timerg.h"
 #include "ti_msp_dl_config.h"
 #include "spi/spi.h"
 #include "sensors/pressure.h"
+#include "sensors/driver_sht4x.h"
 #include "seven-segment-display/seven-segment-display.h"
 #include "uart/uart.h"
 #include "sensors/B-Messer.h"
+#include "sensors/SHT41.h"
+#include "sensors/light.h"
 
-/* Number of bytes for UART packet size */
-#define UART_PACKET_SIZE (26)
+
+
+
+// State machine
+enum SysState{
+    IDLE = 0,
+    SHT41,
+    OPT4001,
+} gSysState;
 
 /* Delay for 5ms to ensure UART TX is idle before starting transmission */
 #define UART_TX_DELAY (160000)
 
-/* Data packets to transmit over UART */
-uint8_t gTxPacket1[UART_PACKET_SIZE] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-    'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
-    'x', 'y', 'z'};
-uint8_t gTxPacket2[UART_PACKET_SIZE] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
-    'X', 'Y', 'Z'};
 
-#define SPI_PACKET_SIZE (4)
-
-/* Data for SPI to transmit */
-uint8_t gTxPacket[SPI_PACKET_SIZE] = {'M', 'S', 'P', '!'};
-volatile uint8_t gRxPacket[SPI_PACKET_SIZE];
 const uint32_t DELAY = 10000000;
-uint8_t uartData[32];
+char uartData[128];
+
+
+// Humidity and Temperature Sensor values
+uint16_t SHT41_temperature_raw, SHT41_humidity_raw;
+float SHT41_temperature_s, SHT41_humidity_s;
+
+// light sensor values
+uint32_t lux_raw;
+
+
+void printSHT41(void) {
+    uint32_t posPointer = 0;
+    strcpy(uartData, "Temp: ");
+    posPointer += 6;
+    int ret = snprintf(&uartData[posPointer], 32, "%f", SHT41_temperature_s);
+    posPointer += ret;  
+    strcpy(&uartData[posPointer], "°C , Hum: ");
+    posPointer += 10;
+    ret = snprintf(&uartData[posPointer], 32, "%f", SHT41_humidity_s);
+    posPointer += ret; 
+    uartData[posPointer++] = 0x25;
+    uartData[posPointer++] = 0x0a;
+    uart_transmit_blocking(uartData, posPointer);
+}
+
+void printOPT4001(void) {
+    uint32_t posPointer = 0;
+    strcpy(uartData, "Lux_Raw: ");
+    posPointer += 9;
+    int ret = snprintf(&uartData[posPointer], 32, "%d", lux_raw);
+    posPointer += ret;  
+    uartData[posPointer++] = 0x0a;
+    uart_transmit_blocking(uartData, posPointer);
+}
 
 int main(void)
 {
     SYSCFG_DL_init();
     initSevenSegment();
+    initSHT41();
+    lightInit();
+    NVIC_EnableIRQ(GPIO_INT_INT_IRQN);
     SevenSegmentUpdate(0);
     /* Optional delay to ensure UART TX is idle before starting transmission */
     delay_cycles(UART_TX_DELAY);
-
+    gSysState = OPT4001;
     uart_write_blocking("Hello World!");
     
 
     uint32_t counter = 0;
     uint8_t reg = 0;
-    SPIInterface spi;
-    spi.DummyByte = 0x00;
-    spi.csMask = GPIO_INT_CS0_PIN; 
-    spi.gpioInt = GPIO_INT_PORT;
-    spi.spiInt = SPI_0_INST;
-    initBMI270(&spi);
+    
+    //initBMI270(&spi);
 
-    while (1) {      
-        //counter = uart_receive_blocking(uartData);
+    
+    
+
+    while (1) {  
+        // Debug I2C Interface
+        /*  
+        counter = uart_receive_blocking(uartData);
         reg = uartData[0];
-
-        if (counter == 3) { // write
-           // SPI_write(uartData[0], &uartData[1], 1, &spi);
+        if (counter > 2) { // write
+            uartData[0] = I2C_write(uartData[0], &uartData[1], counter - 2);
+            uartData[1]= 0x0a;
+            counter = 2;
+        }  else {
+            if (counter == 2) { // read
+                I2C_read(uartData[0], &uartData[1], i2c_readLength);
+                uartData[7]= 0x0a;
+                counter = 8;
+            } 
         }  
-        if (counter == 2) { // read
-           // SPI_read(reg, uartData, 5, &spi);                 
-           // uartData[5] = 0x0a;
-            //counter = 6;
-        }     
         uart_transmit_blocking(uartData, counter);
+         */
 
-        //uart_write_blocking("S");
-        SPI_Delayms(10);
+        switch (gSysState) {
+            case IDLE:
+                SevenSegmentUpdate(0);
+                break;
+            case SHT41:
+                SevenSegmentUpdate(1);
+                getTempHum(&SHT41_temperature_raw, &SHT41_temperature_s, &SHT41_humidity_raw, &SHT41_humidity_s);
+                printSHT41();
+                break;
+            case OPT4001:
+                SevenSegmentUpdate(2);
+                light_getData(&lux_raw);
+                printOPT4001();
+                break;
         }
+        SPI_Delayms(1000);
+    }
+    
 }
+
+
+void GROUP1_IRQHandler(void) {
+    //switch (DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1)) {
+    switch (DL_GPIO_getPendingInterrupt(GPIO_INT_PORT)) {
+        case GPIO_INT_BUT_POS_IIDX:
+            if (gSysState == OPT4001) {
+                gSysState = IDLE;
+            } else {
+                gSysState++;
+            }
+            break;
+        case GPIO_INT_BUT_ANZ_IIDX:
+            SevenSegmentUpdate(12);
+            break;
+    }
+}
+
+
