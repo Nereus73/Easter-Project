@@ -1,6 +1,5 @@
 #include "sensors/B-Messer.h"
 
-
 // variables for main BMI270 driver
 static DL_SPI_CHIP_SELECT chipSelectAcc = DL_SPI_CHIP_SELECT_0;
 struct bmi2_dev dev;
