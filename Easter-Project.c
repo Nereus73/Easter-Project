@@ -122,6 +122,11 @@ int main(void)
         SPI_Delayms(1000);
         init_fdc1004();
         uart_write_blocking("FDC1004 init done!");
+
+        //configure_channel(CONF_MEAS1, CIN1, CAPDAC, 1);
+        //configure_channel(CONF_MEAS2, CIN1, DISABLED, 1);
+        //configure_channel(CONF_MEAS3, CIN1, DISABLED, 1);
+        //configure_channel(CONF_MEAS4, CIN1, DISABLED, 1);
     }
 
     while (1) {  
