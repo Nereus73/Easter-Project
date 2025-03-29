@@ -43,7 +43,7 @@
 #include "sensors/B-Messer.h"
 #include "sensors/SHT41.h"
 #include "sensors/light.h"
-
+#include "sensors/proximity.h"
 
 
 
@@ -52,6 +52,7 @@ enum SysState{
     IDLE = 0,
     SHT41,
     OPT4001,
+    LDC1314,
 } gSysState;
 
 /* Delay for 5ms to ensure UART TX is idle before starting transmission */
@@ -68,6 +69,9 @@ float SHT41_temperature_s, SHT41_humidity_s;
 
 // light sensor values
 uint32_t lux_raw;
+
+// Inductive sensor values
+uint16_t LDC1314_data_ch2;
 
 
 void printSHT41(void) {
@@ -95,12 +99,23 @@ void printOPT4001(void) {
     uart_transmit_blocking(uartData, posPointer);
 }
 
+void printLDC1314(void) {
+    uint32_t posPointer = 0;
+    strcpy(uartData, "Inductive_Raw: ");
+    posPointer += 15;
+    int ret = snprintf(&uartData[posPointer], 32, "%d", LDC1314_data_ch2);
+    posPointer += ret;  
+    uartData[posPointer++] = 0x0a;
+    uart_transmit_blocking(uartData, posPointer);
+}
+
 int main(void)
 {
     SYSCFG_DL_init();
     initSevenSegment();
     initSHT41();
     lightInit();
+    inductiveInit();    // does not work if device ID is wrong
     NVIC_EnableIRQ(GPIO_INT_INT_IRQN);
     SevenSegmentUpdate(0);
     /* Optional delay to ensure UART TX is idle before starting transmission */
@@ -150,6 +165,11 @@ int main(void)
                 light_getData(&lux_raw);
                 printOPT4001();
                 break;
+            case LDC1314:
+                SevenSegmentUpdate(3);
+                inductiveGetData(&LDC1314_data_ch2);
+                printLDC1314();
+                break;
         }
         SPI_Delayms(1000);
     }
@@ -161,14 +181,18 @@ void GROUP1_IRQHandler(void) {
     //switch (DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1)) {
     switch (DL_GPIO_getPendingInterrupt(GPIO_INT_PORT)) {
         case GPIO_INT_BUT_POS_IIDX:
-            if (gSysState == OPT4001) {
+            if (gSysState == LDC1314) {
                 gSysState = IDLE;
             } else {
                 gSysState++;
             }
+            SevenSegmentUpdate(gSysState);
             break;
         case GPIO_INT_BUT_ANZ_IIDX:
             SevenSegmentUpdate(12);
+            break;
+        case GPIO_INT_INT_CAP_IIDX:
+            // Interrupt of the inductive sensor
             break;
     }
 }

@@ -2,11 +2,14 @@
 #include "i2c/i2c.h"
 #include "sensors/LDC1314.h"
 #include "sensors/SHT41.h"
+#include "ti_msp_dl_config.h"
 
 
 LDC1314_handle_t dev;
 
 void inductiveInit(void) {
+    DL_GPIO_clearPins(GPIO_INT_PORT, GPIO_INT_SD_CAP_PIN);
+    I2C_Delayms(4);  //Wait for chip to exit shutdown mode
     dev.iic_init = iic_init;
     dev.iic_deinit = iic_deinit;
     dev.debug_print = debug_print;
