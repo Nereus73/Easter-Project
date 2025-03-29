@@ -43,7 +43,7 @@
 #include "sensors/B-Messer.h"
 #include "sensors/SHT41.h"
 #include "sensors/light.h"
-
+#include "sensors/fdc1004.h"
 
 
 
@@ -52,6 +52,7 @@ enum SysState{
     IDLE = 0,
     SHT41,
     OPT4001,
+    FDC1004
 } gSysState;
 
 /* Delay for 5ms to ensure UART TX is idle before starting transmission */
@@ -105,17 +106,23 @@ int main(void)
     SevenSegmentUpdate(0);
     /* Optional delay to ensure UART TX is idle before starting transmission */
     delay_cycles(UART_TX_DELAY);
-    gSysState = OPT4001;
+    gSysState = FDC1004;
     uart_write_blocking("Hello World!");
     
 
     uint32_t counter = 0;
     uint8_t reg = 0;
+    char buffer[64];
     
     //initBMI270(&spi);
 
+    const uint16_t fdc_device_id = get_device_id();
     
-    
+    if (fdc_device_id == 0x1004){
+        SPI_Delayms(1000);
+        init_fdc1004();
+        uart_write_blocking("FDC1004 init done!");
+    }
 
     while (1) {  
         // Debug I2C Interface
@@ -150,8 +157,18 @@ int main(void)
                 light_getData(&lux_raw);
                 printOPT4001();
                 break;
+            case FDC1004:
+            {
+                const uint32_t ch0 = get_measurement(0);
+                const uint32_t ch1 = get_measurement(1);
+                const uint32_t ch2 = get_measurement(2);
+                const uint32_t ch3 = get_measurement(3);
+                snprintf(buffer, sizeof(buffer), "CH0 = %u\tCH1 = %u\tCH2 = %u\tCH3 = %u", ch0, ch1, ch2, ch3);
+                uart_write_blocking(buffer);
+                break;
+            }
         }
-        SPI_Delayms(1000);
+        SPI_Delayms(200);
     }
     
 }
